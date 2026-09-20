@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "check": "biome migrate --write && biome check --fix"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.13",
+    "@tsconfig/node24": "24.0.5",
+    "@types/node": "24.13.4",
+    "@vercel/ncc": "0.45.0",
+    "pnpm": "12.4.1",
+    "typescript": "6.0.3",
+    "vitest": "5.0.0"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@12.4.1"
+}

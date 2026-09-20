@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "github>int128/renovate-base",
+    "github>int128/typescript-action-renovate-config#v2.0.0",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "packageRules": [
+    {
+      "description": "Split updates per action",
+      "additionalBranchPrefix": "{{packageFileDir}}-",
+      "commitMessageSuffix": "({{packageFileDir}})",
+      "matchPackageNames": ["!node", "!@types/node"]
+    }
+  ],
+  "platformAutomerge": true
+}
