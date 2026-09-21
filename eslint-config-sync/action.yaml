@@ -1,0 +1,6 @@
+name: 'Check Upstream ESLint Alignment Check'
+description: 'Leverages native Copilot LLM layers to review pull requests for linter rules configuration gaps'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

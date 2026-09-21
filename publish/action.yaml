@@ -1,0 +1,86 @@
+# Location: ai-crew-suite/actions -> publish/action.yaml
+name: 'Shared Publish & Release Engine'
+description: 'Centralized package publishing engine featuring Yarn 4 credentials mapping, provenance enforcement, and Slack alerts'
+
+inputs:
+  node-version:
+    description: 'The Node.js runtime version to initialize'
+    required: false
+    default: '22'
+  publish-script:
+    description: 'The internal execution script target passed to the changesets controller'
+    required: false
+    default: 'yarn changeset publish'
+  npm-auth-token:
+    description: 'The credential token required to publish to the npm registry'
+    required: true
+  slack-webhook-url:
+    description: 'The notification destination stream endpoint for build telemetry alerts'
+    required: false
+    default: ''
+  github-token:
+    description: 'The core workflow execution context verification token'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 🟢 Initialize Node.js Environment
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: https://registry.npmjs.org
+        cache: 'yarn'
+
+    - name: 📦 Install Workspace Dependencies (Yarn 4 Immutable)
+      shell: bash
+      run: yarn install --immutable --inline-builds
+      env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'true'
+
+    - name: 🏎️ Initialize Turborepo Remote GitHub Actions Cache
+      uses: rharkor/caching-for-turbo@2238fae6eb9a9936f92356f54cb3660200d105e7 # v2.5.1
+
+    - name: 🛠️ Build and Verify Distribution Packages
+      shell: bash
+      run: yarn turbo run build typecheck
+
+    - name: 🚨 Slack Failure Notification (Build)
+      if: ${{ failure() && inputs.slack-webhook-url != '' }}
+      uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+      env:
+        SLACK_WEBHOOK: ${{ inputs.slack-webhook-url }}
+        SLACK_COLOR: "#FF0000"
+        SLACK_USERNAME: "Crew Suite Deploy Bot"
+        SLACK_TITLE: "❌ Master Build Failed"
+        SLACK_MESSAGE: "The main production compilation has failed for ${{ github.repository }}. Review logs at: https://github.com{{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+    - name: 🔐 Configure NPM Scope Registries & Provenance Flags
+      shell: bash
+      run: |
+        git config --global user.email "bot@ai-crew-suite.com"
+        git config --global user.name "ai-crew-suite-bot"
+        yarn config set npmScopes.ai-crew-suite.npmRegistryServer "https://registry.npmjs.org"
+        yarn config set npmScopes.ai-crew-suite.npmPublishRegistry "https://registry.npmjs.org"
+        yarn config set npmScopes.ai-crew-suite.npmAlwaysAuth true
+        yarn config set npmAuthToken "${{ inputs.npm-auth-token }}"
+        echo "YARN_NPM_PUBLISH_PROVENANCE=true" >> $GITHUB_ENV
+
+    - name: 🚀 Publish Packages & Create GitHub Release
+      id: changesets
+      uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+      with:
+        publish-script: ${{ inputs.publish-script }}
+        github-token: ${{ inputs.github-token }}
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.npm-auth-token }}
+
+    - name: 📢 Slack Success Notification
+      if: steps.changesets.outputs.published == 'true' && inputs.slack-webhook-url != ''
+      uses: rtCamp/action-slack-notify@33ca3be66c6f378fe1610fd1d5258632dbed5e58 # v2.4.0
+      env:
+        SLACK_WEBHOOK: ${{ inputs.slack-webhook-url }}
+        SLACK_COLOR: "#36a64f"
+        SLACK_USERNAME: "Crew Suite Deploy Bot"
+        SLACK_TITLE: "🚀 New Release Published Successfully"
+        SLACK_MESSAGE: "A new version of *${{ github.repository }}* has been deployed under the @ai-crew-suite scope! View the updated code repository or releases section on GitHub."

@@ -1,0 +1,68 @@
+# Location: ai-crew-suite/actions -> playwright-run/action.yaml
+name: 'Playwright Run Engine'
+description: 'Centralized continuous integration task sequence initializing dependencies and executing Playwright tests'
+
+inputs:
+  dev-server-port:
+    description: 'Target framework developer host port mapping value'
+    required: false
+    default: '3000'
+  public-sentry-dsn:
+    description: 'Telemetry monitoring connection target stream identifier'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📢 Dev Gate Alert Reminder
+      shell: bash
+      run: |
+        echo "::warning title=Early Development Mode::Playwright gating is NOT currently strictly enforced on deployments."
+
+    - name: 🟢 Setup Node.js Context
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: "22"
+        cache: "yarn"
+
+    - name: 📦 Install Workspace Dependencies (Yarn 4 Immutable)
+      shell: bash
+      run: yarn install --immutable --inline-builds
+      env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'true'
+
+    - name: 🏎️ Initialize Turborepo Remote GitHub Actions Cache
+      uses: rharkor/caching-for-turbo@2238fae6eb9a9936f92356f54cb3660200d105e7 # v2.5.1
+
+    - name: 🏗️ Build monorepo targets
+      shell: bash
+      run: yarn turbo run build
+
+    - name: 🎭 Install Playwright browsers
+      shell: bash
+      run: npx playwright install --with-deps chromium
+
+    - name: 🔐 Prepare mock auth file
+      shell: bash
+      run: mkdir -p playwright/.auth && echo '{}' > playwright/.auth/login.json
+
+    - name: 🚀 Run Playwright E2E tests
+      shell: bash
+      run: npx playwright test
+      env:
+        CI: "1"
+        DEV_SERVER_HOST: "localhost"
+        DEV_SERVER_PORT: ${{ inputs.dev-server-port }}
+        DISABLE_TELEMETRY: "true"
+        FORCE_COLOR: "3"
+        PUBLIC_SENTRY_DSN: ${{ inputs.public-sentry-dsn }}
+        PLAYWRIGHT_BASE_URL: "http://localhost:${{ inputs.dev-server-port }}"
+
+    - name: 📊 Upload Playwright report on failure
+      if: failure()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30

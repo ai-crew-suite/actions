@@ -1,0 +1,14 @@
+# Location: ai-crew-suite/actions -> playwright-bypass/action.yaml
+name: 'Playwright Bypass Logger'
+description: 'Standard organization-wide logging and tracking for bypassed E2E testing checkpoints'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 🪵 Generate Visual E2E Skip Summary
+      shell: bash
+      run: |
+        echo "## ⚠️ E2E Integration Pipeline Bypassed" >> \$GITHUB_STEP_SUMMARY
+        echo "The **Playwright Test Suite** was skipped because this branch was flagged as an emergency hotfix branch." >> \$GITHUB_STEP_SUMMARY
+        echo "- **Repository**: \`${{ github.repository }}\`" >> \$GITHUB_STEP_SUMMARY
+        echo "- **Triggered By**: @ github.actor " >> GITHUB_STEP_SUMMARY

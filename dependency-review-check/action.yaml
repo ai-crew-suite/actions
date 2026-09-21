@@ -1,0 +1,17 @@
+name: 'Dependency Review Check'
+description: 'Centralized security evaluation engine to intercept critical supply-chain vulnerabilities in PRs'
+
+inputs:
+  fail-on-severity:
+    description: 'The minimum vulnerability severity threshold that will cause the build step to fail'
+    required: false
+    default: 'critical'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 🔒 Execute Dependency Review Core Engine
+      uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+      with:
+        fail-on-severity: ${{ inputs.fail-on-severity }}
+        comment-summary-in-pr: 'always'

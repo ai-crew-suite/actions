@@ -1,4 +1,21 @@
 {
+  "eslint.nodePath": ".yarn/sdks",
+  "files.associations": {
+    "**/actions/**/action.yaml": "yaml",
+    "**/actions/**/action.yml": "yaml"
+  },
+  "js/ts.tsdk.path": ".yarn/sdks/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "yaml.schemas": {
+    "https://backstage.io": "app-config*.yaml"
+  },
+  "ts.tsdk": "node_modules/typescript/lib",
+  "ts.enablePromptUseWorkspaceTsdk": true,
   "cSpell.words": [
     "Accum",
     "actioned",
@@ -78,21 +95,5 @@
     "xoxp",
     "yarnrc",
     "zipfs"
-  ],
-  "search.exclude": {
-    "**/.yarn": true,
-    "**/.pnp.*": true
-  },
-  "eslint.nodePath": ".yarn/sdks",
-  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
-  "js/ts.tsdk.path": ".yarn/sdks/typescript/lib",
-  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
-  "yaml.schemas": {
-    "https://backstage.io": "app-config*.yaml"
-  },
-  "typescript.tsdk": ".yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "chat.instructionsFilesLocations": {
-    ".vscode/instructions": true
-  }
+  ]
 }

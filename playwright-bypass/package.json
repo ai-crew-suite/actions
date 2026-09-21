@@ -1,6 +1,6 @@
 {
-  "name": "@ai-crew-suite/action-automate-stale",
-  "description": "Centralized composite GitHub Action to automatically flag, track, and close stale issues and pull requests across the AI Crew Suite.",
+  "name": "@ai-crew-suite/action-playwright-bypass",
+  "description": "Standard organization-wide logging and tracking for bypassed E2E testing checkpoints",
   "private": true,
   "license": "Apache-2.0",
   "type": "module",

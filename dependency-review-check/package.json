@@ -1,8 +1,8 @@
 {
-  "name": "@ai-crew-suite/action-automate-stale",
-  "description": "Centralized composite GitHub Action to automatically flag, track, and close stale issues and pull requests across the AI Crew Suite.",
-  "private": true,
+  "name": "@ai-crew-suite/action-dependency-review-check",
+  "description": "GitHub Action to perform the dependency review check",
   "license": "Apache-2.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "lint": "lint:actions && lint:typescript",

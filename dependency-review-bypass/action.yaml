@@ -1,0 +1,22 @@
+name: 'Dependency Review Bypass'
+description: 'Standard organization-wide logging and tracking for bypassed security gates'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: ⚠️ Log Security Compliance Exemption
+      shell: bash
+      run: |
+        echo "================================================================================"
+        echo "⚠️ SECURITY NOTICE: hotfix/* branch detected."
+        echo "Skipping active dependency scanning per corporate emergency-deployment protocols."
+        echo "================================================================================"
+
+        # Append an inescapable visual banner onto the GitHub UI Job Summary tab
+        echo "## ⚠️ Security Policy Exemption Triggered" >> \$GITHUB_STEP_SUMMARY
+        echo "The **Dependency Review Check** was bypassed because this branch was flagged as an emergency hotfix." >> \$GITHUB_STEP_SUMMARY
+        echo "- **Repository**: \`${{ github.repository }}\`" >> \$GITHUB_STEP_SUMMARY
+        echo "- **Triggered By**: @\({{ github.actor }}" >> \)GITHUB_STEP_SUMMARY
+        echo "- **Branch/Ref**: \`${{ github.head_ref || github.ref_name }}\`" >> \$GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: \$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> \$GITHUB_STEP_SUMMARY
+        echo "---" >> \$GITHUB_STEP_SUMMARY

@@ -2,22 +2,41 @@
   "name": "actions",
   "description": "GitHub Actions package for the AI Crew Suite repos",
   "license": "Apache-2.0",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": "22 || 24"
   },
   "packageManager": "yarn@4.18.0",
   "workspaces": [
-    "actions/*"
+    "automate-stale",
+    "changeset",
+    "ci",
+    "codeql",
+    "dependency-review-bypass",
+    "dependency-review-check",
+    "eslint-config-sync",
+    "lint-architecture",
+    "playwright-bypass",
+    "playwright-run",
+    "publish",
+    "weekly-check-versions",
+    "validate-branch"
   ],
   "type": "module",
   "scripts": {
     "build": "turbo build",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{json,md,css,ts,js}\"",
-    "lint": "turbo lint",
+    "lint": "lint:actions && lint:typescript",
+    "lint:actions": "turbo lint:actions",
+    "lint:typescript": "turbo lint:typescript",
     "sync": "crew sync:refs",
-    "test": "turbo test",
+    "test": "yarn test:unit",
+    "test:unit": "turbo test:unit",
+    "test:unit:coverage": "turbo run test:unit:coverage",
+    "typecheck": "turbo typecheck",
+    "typecheck:full": "turbo typecheck --force",
     "version": "changeset version && yarn install"
   },
   "lint-staged": {

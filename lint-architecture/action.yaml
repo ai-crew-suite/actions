@@ -1,0 +1,5 @@
+name: 'Validate Monorepo Architecture'
+description: 'Enforces package naming conventions and physical path directory layouts'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

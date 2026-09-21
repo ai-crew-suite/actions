@@ -10,17 +10,31 @@ runs:
   using: 'composite'
   steps:
     - name: 📂 Initialize CodeQL Core Analysis Engines
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
       with:
         languages: ${{ inputs.language }}
-        # Embedded security and quality query settings override the need for a local config file
         queries: +security-and-quality
+        config: |
+          name: "Centralized CodeQL Configuration"
+          disable-default-queries: false
+          paths:
+            - "packages"
+            - "plugins"
+            - "scripts"
+            - "test"
+            - "actions"
+          paths-ignore:
+            - "**/node_modules"
+            - "**/dist"
+            - "**/dist-types"
+            - "**/.turbo"
+            - "**/.yarn"
 
     - name: 🛠️ Autobuild Source Targets
       if: inputs.language == 'javascript'
-      uses: github/codeql-action/autobuild@v3
+      uses: github/codeql-action/autobuild@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
 
     - name: 🔎 Perform CodeQL Analysis Matrix Passes
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
       with:
         category: "/language:${{ inputs.language }}"

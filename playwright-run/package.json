@@ -1,6 +1,6 @@
 {
-  "name": "@ai-crew-suite/action-lint-architecture",
-  "description": "GitHub Action to lint the architecture of the project",
+  "name": "@ai-crew-suite/action-playwright",
+  "description": "GitHub Action to run Playwright tests",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@actions/core": "catalog:prod:"
+    "@actions/core": "catalog:prod:",
+    "@actions/github": "catalog:prod:"
   },
   "devDependencies": {
     "@types/node": "catalog:dev",
