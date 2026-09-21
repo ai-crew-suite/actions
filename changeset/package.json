@@ -1,0 +1,26 @@
+{
+  "name": "@ai-crew-suite/action-changeset-controller",
+  "description": "Centralized workspace distribution script engine for shared Changeset operations",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "ncc build src/main.ts -o dist --source-map --license third-party-licenses.txt",
+    "clean": "rm -rf dist third-party-licenses.txt",
+    "format": "prettier --write \"src/**/*.{ts,js}\" \"package.json\"",
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@actions/core": "catalog:prod:actions/core",
+    "@actions/github": "catalog:prod:actions/github"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:dev:types/node",
+    "@vercel/ncc": "catalog:dev:vercel/ncc",
+    "eslint": "catalog:dev:eslint",
+    "prettier": "catalog:dev:prettier",
+    "typescript": "catalog:dev:typescript",
+    "vitest": "catalog:dev:vitest"
+  }
+}

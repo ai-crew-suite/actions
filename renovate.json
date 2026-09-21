@@ -1,16 +1,41 @@
 {
+  "$schema": "https://renovatebot.com",
   "extends": [
-    "github>int128/renovate-base",
-    "github>int128/typescript-action-renovate-config#v2.0.0",
-    "helpers:pinGitHubActionDigests"
+    "config:best-practices",
+    "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "schedule": ["on monday"],
   "packageRules": [
     {
-      "description": "Split updates per action",
-      "additionalBranchPrefix": "{{packageFileDir}}-",
-      "commitMessageSuffix": "({{packageFileDir}})",
-      "matchPackageNames": ["!node", "!@types/node"]
+      "description": "Bundle all upgrades across Node dependencies, workflow actions, and custom action configs into a single PR",
+      "matchPackagePatterns": ["*"],
+      "groupName": "All Dependencies",
+      "prBodyNotes": [
+        "### ⚠️ Testing Instructions for Central GitHub Actions Updates",
+        "- [ ] Verify that custom actions compilation/build steps succeed (if using a build step).",
+        "- [ ] Trigger a test run of dependent workflows in a scratch/test branch if applicable.",
+        "- [ ] Ensure node_modules and action entrypoints remain correctly referenced."
+      ]
+    },
+    {
+      "description": "Annotate PRs modifying the production catalog to remind devs to increment the root version key",
+      "matchDepTypes": ["catalogs:prod", "dependencies"],
+      "prBodyNotes": [
+        "---",
+        "### 🚀 Production Asset Update Detected",
+        "> [!NOTE]",
+        "> **Action Required**: This PR modifies production runtimes. Remember to **increment the version number** in the root `package.json` and release an updated Git tag so downstream consumer repositories pull the updated logic."
+      ]
+    },
+    {
+      "description": "Annotate PRs modifying devDependencies or the dev catalog that they do NOT need a root version bump",
+      "matchDepTypes": ["catalogs:dev", "devDependencies"],
+      "prBodyNotes": [
+        "---",
+        "### 🛠️ Internal Dev/Tooling Asset Update Detected",
+        "> [!WARNING]",
+        "> **Notice**: This PR only impacts local testing, linting, or internal developer utilities. The root repository version **should not be incremented** for this change."
+      ]
     }
-  ],
-  "platformAutomerge": true
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turbo.build",
+  "concurrency": "75%",
+  "globalEnv": [
+    "NODE_ENV",
+    "CI"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "inputs": ["src/**/*", "action.yml", "package.json"]
+    },
+    "clean": {
+      "dependsOn": ["^clean"],
+      "cache": false
+    },
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "outputs": [],
+      "cache": true
+    },
+    "typecheck": {
+      "outputs": []
+    }
+  }
+}

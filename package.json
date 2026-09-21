@@ -1,21 +1,50 @@
 {
+  "name": "actions",
+  "description": "GitHub Actions package for the AI Crew Suite repos",
+  "license": "Apache-2.0",
   "private": true,
-  "license": "MIT",
-  "scripts": {
-    "check": "biome migrate --write && biome check --fix"
-  },
-  "type": "module",
-  "devDependencies": {
-    "@biomejs/biome": "2.5.13",
-    "@tsconfig/node24": "24.0.5",
-    "@types/node": "24.13.4",
-    "@vercel/ncc": "0.45.0",
-    "pnpm": "12.4.1",
-    "typescript": "6.0.3",
-    "vitest": "5.0.0"
-  },
   "engines": {
-    "node": "24.x"
+    "node": "22 || 24"
   },
-  "packageManager": "pnpm@12.4.1"
+  "packageManager": "yarn@4.18.0",
+  "workspaces": [
+    "actions/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "turbo build",
+    "clean": "turbo clean",
+    "format": "prettier --write \"**/*.{json,md,css,ts,js}\"",
+    "lint": "turbo lint",
+    "sync": "crew sync:refs",
+    "test": "turbo test",
+    "version": "changeset version && yarn install"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100
+  },
+  "devDependencies": {
+    "@changesets/cli": "catalog:dev",
+    "@tsconfig/node24": "catalog:dev",
+    "@types/node": "catalog:dev",
+    "@typescript-eslint/eslint-plugin": "catalog:dev",
+    "@typescript-eslint/parser": "catalog:dev",
+    "eslint": "catalog:dev",
+    "husky": "catalog:dev",
+    "lint-staged": "catalog:dev",
+    "prettier": "catalog:dev",
+    "turbo": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
 }

@@ -1,0 +1,26 @@
+{
+  "name": "@ai-crew-suite/action-automate-stale",
+  "description": "Centralized composite GitHub Action to automatically flag, track, and close stale issues and pull requests across the AI Crew Suite.",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "ncc build src/main.ts -o dist --source-map --license third-party-licenses.txt",
+    "clean": "rm -rf dist third-party-licenses.txt",
+    "format": "prettier --write \"src/**/*.{ts,js}\" \"package.json\"",
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@actions/core": "catalog:prod:actions/core",
+    "@actions/github": "catalog:prod:actions/github"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:dev:types/node",
+    "@vercel/ncc": "catalog:dev:vercel/ncc",
+    "eslint": "catalog:dev:eslint",
+    "prettier": "catalog:dev:prettier",
+    "typescript": "catalog:dev:typescript",
+    "vitest": "catalog:dev:vitest"
+  }
+}

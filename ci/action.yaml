@@ -1,0 +1,69 @@
+# Location: ai-crew-suite/actions -> ci/action.yaml
+name: 'Shared CI Pipeline Engine'
+description: 'Centralized continuous integration pipeline executing installations, builds, lints, and E2E tests'
+
+inputs:
+  node-version:
+    description: 'The Node.js runtime version to test against'
+    required: true
+  playwright-base-url:
+    description: 'The target base URL for Playwright integration tests'
+    required: false
+    default: 'http://localhost:3000'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📂 Checkout Repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+
+    - name: 🟢 Setup Node.js v${{ inputs.node-version }}
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'yarn'
+
+    - name: 📦 Install Workspace Dependencies
+      shell: bash
+      run: yarn install --immutable --inline-builds
+      env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'true'
+
+    - name: 🏎️ Initialize Turborepo Remote GitHub Actions Cache
+      uses: rharkor/caching-for-turbo@v2.3.12
+
+    - name: ✨ Verify Source Formatting (Prettier)
+      shell: bash
+      run: yarn prettier --check .
+
+    - name: 🛠️ Execute Turbo Build, Lint & Typecheck
+      shell: bash
+      run: yarn turbo run build lint typecheck
+
+    - name: 🟢 Run Automated Unit Test Harness
+      shell: bash
+      run: yarn turbo run test
+
+    - name: 🎭 Provision Playwright Engine
+      shell: bash
+      run: npx playwright install --with-deps chromium
+
+    - name: 🔐 Prepare Mock Local Storage Auth File
+      shell: bash
+      run: mkdir -p playwright/.auth && echo '{}' > playwright/.auth/login.json
+
+    - name: 🚀 Run Playwright End-to-End Tests
+      shell: bash
+      run: npx playwright test
+      env:
+        PLAYWRIGHT_BASE_URL: ${{ inputs.playwright-base-url }}
+
+    - name: 📊 Upload Playwright Report on Failure
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: playwright-report-node-${{ inputs.node-version }}
+        path: playwright-report
+        retention-days: 1

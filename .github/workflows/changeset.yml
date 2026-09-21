@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   create-release-pr:
     name: Create Changeset PR
@@ -21,16 +25,22 @@ jobs:
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
+          # Natively caches Yarn 4 installations across pipeline executions
+          cache: "yarn"
 
       - name: 📦 Install Workspace Dependencies
-        uses: backstage/actions/yarn-install@0d281eb2e96927466db49d4cd01d52b14809a66b # v0.7.10
-        with:
-          cache-prefix: ${{ runner.os }}-node-${{ matrix.node-version }}
+        run: yarn install --immutable
+        env:
+          # Yarn 4 needs to know it is running inside non-interactive CI environments
+          YARN_ENABLE_IMMUTABLE_INSTALLS: true
+
+      # Run compile step so published artifacts exist
+      - name: ⚡ Compile Local Actions via Turbo
+        run: yarn build
 
       - name: 🚀 Create Release Pull Request
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          version-script: yarn release
-          pr-title: "Version Packages - plugins"
-          # v2 reads the token only from this input; the GITHUB_TOKEN env var is ignored
+          version-script: yarn version
+          pr-title: "Version Packages - actions suite"
           github-token: ${{ secrets.GITHUB_TOKEN }}

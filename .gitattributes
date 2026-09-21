@@ -1,1 +1,15 @@
-dist/** -diff linguist-generated=true 
+actions/**/dist/*.js -diff linguist-generated=true
+
+# Enforce universal LF line endings for all code files to prevent cross-OS shell script breaks
+* text=auto eol=lf
+
+# Explicitly ensure bash/sh workflow entries preserve executable traits natively
+*.sh text eol=lf
+
+# Treat auto-generated, compressed, or binary files as flat data targets
+*.gz binary
+*.png binary
+*.jpg binary
+
+# Tell Git that compiled ncc single-line action bundles shouldn't mess up diff calculations
+**/dist/*.js linguist-generated=true

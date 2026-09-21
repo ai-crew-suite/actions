@@ -1,0 +1,43 @@
+# Location: ai-crew-suite/actions -> changeset/action.yaml
+name: 'Shared Changeset PR Controller'
+description: 'Centralized engine to manage workspace installations and execute Changesets pull requests'
+
+inputs:
+  node-version:
+    description: 'The Node.js runtime version to initialize'
+    required: false
+    default: '22'
+  github-token:
+    description: 'The GitHub access token required to generate and track pull requests'
+    required: true
+  pr-title:
+    description: 'The display title applied to the automatically generated Changeset PR'
+    required: false
+    default: 'Version Packages - release automated updates'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📂 Checkout Caller Repository
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - name: 🟢 Initialize Node.js Environment
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'yarn' # Natively tracks lockfile hashes across executions
+
+    # We skip executing local postinstall scripts using standard flags
+    # to guarantee third-party setups don't disrupt early build passes.
+    - name: 📦 Install Workspace Dependencies (Yarn 4 Immutable)
+      shell: bash
+      run: yarn install --immutable --inline-builds
+      env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'true'
+
+    - name: 🚀 Execute Changeset Workflow Lifecycle
+      uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+      with:
+        version-script: yarn version
+        pr-title: ${{ inputs.pr-title }}
+        github-token: ${{ inputs.github-token }}

@@ -1,0 +1,26 @@
+name: 'Shared CodeQL Security Engine'
+description: 'Centralized CodeQL code scanning for javascript and custom actions'
+
+inputs:
+  language:
+    description: 'The target scanning engine language runtime context'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📂 Initialize CodeQL Core Analysis Engines
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ inputs.language }}
+        # Embedded security and quality query settings override the need for a local config file
+        queries: +security-and-quality
+
+    - name: 🛠️ Autobuild Source Targets
+      if: inputs.language == 'javascript'
+      uses: github/codeql-action/autobuild@v3
+
+    - name: 🔎 Perform CodeQL Analysis Matrix Passes
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ inputs.language }}"

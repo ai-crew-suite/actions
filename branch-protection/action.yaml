@@ -1,0 +1,55 @@
+name: 'Validate Branch and PR Targets'
+description: 'Centralized rules enforcing branch naming conventions and PR targets across AI Crew Suite'
+
+inputs:
+  head-ref:
+    description: 'The source branch name (github.head_ref)'
+    required: true
+  base-ref:
+    description: 'The target branch name (github.base_ref)'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 🏷️ Check branch naming convention
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ inputs.head-ref }}
+      run: |
+        : "${BRANCH_NAME:?head-ref input is required}"
+
+        HUMAN_BRANCH_REGEX='^(bugfix|hotfix|feature|infrastructure|maintenance|content)/[a-z0-9-]+$'
+        DEPENDABOT_BRANCH_REGEX='^dependabot/[a-z0-9._/-]+$'
+
+        if [[ ! $BRANCH_NAME =~ $HUMAN_BRANCH_REGEX && ! $BRANCH_NAME =~ $DEPENDABOT_BRANCH_REGEX ]]; then
+          echo "❌ Invalid branch name: $BRANCH_NAME"
+          echo ""
+          echo "Branch names must follow one of these patterns:"
+          echo "  - bugfix/<description>     (e.g., bugfix/fix-navigation-menu)"
+          echo "  - hotfix/<description>     (e.g., hotfix/critical-security-patch)"
+          echo "  - feature/<description>    (e.g., feature/add-contact-form)"
+          echo "  - infrastructure/<desc>    (e.g., infrastructure/setup-ci)"
+          echo "  - maintenance/<desc>       (e.g., maintenance/update-dependencies)"
+          echo "  - content/<description>    (e.g., content/update-about-page)"
+          echo "  - dependabot/<...>         (machine generated)"
+          echo ""
+          echo "For non-dependabot branches, use lowercase letters, numbers, and hyphens only."
+          exit 1
+        fi
+
+        echo "✅ Branch name is valid: $BRANCH_NAME"
+
+    - name: 🎯 Ensure PR targets main
+      shell: bash
+      env:
+        TARGET_BRANCH: ${{ inputs.base-ref }}
+      run: |
+        : "${TARGET_BRANCH:?base-ref input is required}"
+
+        if [[ "$TARGET_BRANCH" != "main" ]]; then
+          echo "⚠️ Warning: PR is targeting '$TARGET_BRANCH' instead of 'main'"
+          echo "This is allowed, but make sure this is intentional."
+        else
+          echo "✅ PR correctly targets 'main' branch"
+        fi
