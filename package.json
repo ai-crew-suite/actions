@@ -60,10 +60,12 @@
     "@typescript-eslint/parser": "catalog:dev",
     "eslint": "catalog:dev",
     "husky": "catalog:dev",
+    "jiti": "catalog:dev",
     "lint-staged": "catalog:dev",
     "prettier": "catalog:dev",
     "turbo": "catalog:dev",
     "typescript": "catalog:dev",
+    "vite": "catalog:dev",
     "vitest": "catalog:dev"
   }
 }

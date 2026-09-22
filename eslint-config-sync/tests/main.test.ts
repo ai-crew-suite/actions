@@ -1,61 +1,107 @@
-// Location: ai-crew-suite/actions -> lint-architecture/src/main.test.ts
-import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// Location: eslint-config-sync/tests/main.test.ts
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
-import { validatePackage } from './main';
+import * as github from '@actions/github';
 
-describe('Monorepo Architecture Layout Validations', () => {
-  const sandboxWorkspace = path.join(__dirname, '../tmp-architecture-sandbox');
+import { run } from '../src/main';
+
+const createCommentSpy = vi.fn().mockResolvedValue({ status: 201 });
+
+vi.mock('@actions/github', () => {
+  return {
+    context: {
+      repo: {
+        owner: 'ai-crew-suite',
+        repo: 'actions',
+      },
+    },
+    getOctokit: vi.fn().mockImplementation(() => ({
+      rest: {
+        issues: {
+          createComment: createCommentSpy,
+        },
+      },
+    })),
+  };
+});
+
+describe('ESLint Config Sync Action Tests', () => {
+  const tmpDir = path.join(__dirname, '../tmp-test-workspace');
 
   beforeEach(() => {
-    // Generate an isolated, clean repository filesystem context for each validation run
-    if (fs.existsSync(sandboxWorkspace)) {
-      fs.rmSync(sandboxWorkspace, { recursive: true, force: true });
-    }
-    fs.mkdirSync(sandboxWorkspace, { recursive: true });
-    vi.spyOn(process, 'cwd').mockReturnValue(sandboxWorkspace);
+    if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.mkdirSync(tmpDir, { recursive: true });
+    vi.spyOn(process, 'cwd').mockReturnValue(tmpDir);
+    vi.stubEnv('GITHUB_TOKEN', 'mock-github-token');
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
-    if (fs.existsSync(sandboxWorkspace)) {
-      fs.rmSync(sandboxWorkspace, { recursive: true, force: true });
-    }
+    if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  test('✅ Should pass valid core infrastructure structures', () => {
-    const targetDir = path.join(sandboxWorkspace, 'plugins/core/infra/database/postgres');
-    fs.mkdirSync(targetDir, { recursive: true });
+  test('✅ Should execute the sync run pipeline successfully', async () => {
+    // 1. Seed the package json with the caret to trigger fallback logic
+    const mockPkg = { devDependencies: { '@backstage/cli': '^1.24.0' } };
+    fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify(mockPkg));
 
-    const targetFile = path.join(targetDir, 'package.json');
-    fs.writeFileSync(targetFile, JSON.stringify({ name: '@ai-crew-suite/infra-database-postgres' }));
+    // 2. Seed a mock yarn.lock to satisfy the fallback string parser
+    const mockLock = `"@backstage/cli@npm:^1.24.0":\n  version "1.24.0"\n`;
+    fs.writeFileSync(path.join(tmpDir, 'yarn.lock'), mockLock);
 
-    const { isValid, result } = validatePackage(targetFile);
-    expect(isValid).toBe(true);
-    expect(result).toBeNull();
-  });
+    const localConfigPath = path.join(tmpDir, 'packages/config-eslint/src');
+    fs.mkdirSync(localConfigPath, { recursive: true });
+    fs.writeFileSync(path.join(localConfigPath, 'index.ts'), 'export const config = {};');
 
-  test('❌ Should fail misaligned agent tier configurations', () => {
-    const targetDir = path.join(sandboxWorkspace, 'plugins/agents/custom-domain/wrong-tier');
-    fs.mkdirSync(targetDir, { recursive: true });
+    const mockEvent = { pull_request: { number: 42, comments_url: 'https://github.com' } };
+    const eventFilePath = path.join(tmpDir, 'event.json');
+    fs.writeFileSync(eventFilePath, JSON.stringify(mockEvent));
+    vi.stubEnv('GITHUB_EVENT_PATH', eventFilePath);
 
-    const targetFile = path.join(targetDir, 'package.json');
-    fs.writeFileSync(targetFile, JSON.stringify({ name: '@ai-crew-suite/agent-invalid-name-format' }));
+    vi.spyOn(global, 'fetch').mockImplementation(async (url) => {
+      const urlStr = url.toString();
+      if (urlStr.includes('://raw.githubusercontent.com')) {
+        return { ok: true, text: async () => 'module.exports = { upstreamRules: true };' } as Response;
+      }
+      if (urlStr.includes('copilot_internal/v2/token')) {
+        return { ok: true, json: async () => ({ token: 'mock-exchanged-proxy-token' }) } as Response;
+      }
+      if (urlStr.includes('://api.githubcopilot.com')) {
+        return {
+          ok: true,
+          json: async () => ({
+            choices: [{ message: { content: 'AI analysis: Everything aligns perfectly.' } }],
+          }),
+        } as Response;
+      }
+      return { ok: false } as Response;
+    });
 
-    const { isValid, result } = validatePackage(targetFile);
-    expect(isValid).toBe(false);
-    expect(result).toBe('@ai-crew-suite/agent-custom-domain-wrong-tier');
-  });
+    await run();
 
-  test('✅ Should completely ignore untracked or non-scoped packages', () => {
-    const targetDir = path.join(sandboxWorkspace, 'plugins/tools/utility/helper');
-    fs.mkdirSync(targetDir, { recursive: true });
-
-    const targetFile = path.join(targetDir, 'package.json');
-    fs.writeFileSync(targetFile, JSON.stringify({ name: 'third-party-unscoped-library' }));
-
-    const { isValid, result } = validatePackage(targetFile);
-    expect(isValid).toBe(true);
-    expect(result).toBeNull();
+    expect(createCommentSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        issue_number: 42,
+        body: expect.stringContaining('Everything aligns perfectly.'),
+      })
+    );
   });
 });

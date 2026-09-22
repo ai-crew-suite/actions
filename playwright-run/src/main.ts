@@ -1,4 +1,19 @@
-import * as core from '@actions/core';
+/**
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { setFailed, info, warning, getInput } from '@actions/core';
 import * as github from '@actions/github';
 
 export function findSuccessForSha(runs: any[], expectedSha: string): boolean {
@@ -14,14 +29,14 @@ export function findSuccessForSha(runs: any[], expectedSha: string): boolean {
 export async function run(): Promise<void> {
   try {
     // 1. Gather all inputs using the standard core SDK instead of manual env parsing
-    const token = core.getInput('github_token', { required: true });
-    const expectedSha = core.getInput('expected_sha', { required: true });
-    const workflowFile = core.getInput('workflow_file') || 'playwright.yml';
+    const token = getInput('github_token', { required: true });
+    const expectedSha = getInput('expected_sha', { required: true });
+    const workflowFile = getInput('workflow_file') || 'playwright.yml';
 
-    const perPageInput = core.getInput('per_page') || '50';
+    const perPageInput = getInput('per_page') || '50';
     const perPage = parseInt(perPageInput, 10) || 50;
 
-    const preReleaseBypass = core.getInput('pre_release_bypass') || 'true';
+    const preReleaseBypass = getInput('pre_release_bypass') || 'true';
 
     // 2. Resolve target repository naming matrices natively
     const { owner, repo } = github.context.repo;
@@ -29,7 +44,7 @@ export async function run(): Promise<void> {
       throw new Error('Could not resolve repository owner or name from context targets.');
     }
 
-    core.info(`🔍 Checking completed runs of '${workflowFile}' in ${owner}/${repo} for SHA: ${expectedSha}...`);
+    info(`🔍 Checking completed runs of '${workflowFile}' in ${owner}/${repo} for SHA: ${expectedSha}...`);
 
     // 3. Initialize Octokit and fetch completed workflow runs
     const octokit = github.getOctokit(token);
@@ -46,25 +61,25 @@ export async function run(): Promise<void> {
 
     // 4. Evaluate the run status and enforce gates
     if (findSuccessForSha(runs, expectedSha)) {
-      core.info('✅ Playwright succeeded for this SHA');
+      info('✅ Playwright succeeded for this SHA');
       return;
     }
 
     // Handle early development pre-release bypass conditions
     if (preReleaseBypass.toLowerCase() === 'true') {
-      core.warning(`⚠️ WARNING: Playwright has not completed successfully for SHA ${expectedSha}!`);
-      core.warning('⚠️ [EARLY DEVELOPMENT BYPASS] Allowing deployment anyway. Remember to enforce this check later.');
+      warning(`⚠️ WARNING: Playwright has not completed successfully for SHA ${expectedSha}!`);
+      warning('⚠️ [EARLY DEVELOPMENT BYPASS] Allowing deployment anyway. Remember to enforce this check later.');
       return;
     }
 
-    core.setFailed(`❌ Playwright has not completed successfully for SHA ${expectedSha}; aborting deploy.`);
+    setFailed(`❌ Playwright has not completed successfully for SHA ${expectedSha}; aborting deploy.`);
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(`Guardrail Execution Failure: ${error.message}`);
+      setFailed(`Guardrail Execution Failure: ${error.message}`);
     }
   }
 }
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
   run();
 }

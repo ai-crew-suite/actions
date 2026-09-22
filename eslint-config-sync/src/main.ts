@@ -1,8 +1,22 @@
-// Location: ai-crew-suite/actions -> eslint-alignment-check/src/main.ts
-import * as core from '@actions/core';
+/**
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://apache.org
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { setFailed, info, warning } from '@actions/core';
 import * as github from '@actions/github';
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { resolve } from 'path';
 
 interface GitHubFile {
   filename: string;
@@ -15,7 +29,7 @@ async function fetchUrl(url: string, headers?: Record<string, string>): Promise<
     if (!res.ok) return null;
     return await res.text();
   } catch (error) {
-    core.warning(`⚠️ Error fetching URL ${url}: ${error}`);
+    warning(`⚠️ Error fetching URL ${url}: ${error}`);
     return null;
   }
 }
@@ -72,46 +86,50 @@ async function askGithubLLM(token: string, prompt: string): Promise<string> {
     };
     return resData.choices[0]?.message?.content || 'Empty response from AI engine.';
   } catch (error) {
-    core.warning(`⚠️ Native GitHub Copilot LLM proxy call failed: ${error}`);
+    warning(`⚠️ Native GitHub Copilot LLM proxy call failed: ${error}`);
     return 'Could not generate AI analysis due to token validation or runtime timeout errors.';
   }
 }
 
 export async function run(): Promise<void> {
   try {
+    const workspaceRoot = process.cwd();
+
     const githubToken = process.env['GITHUB_TOKEN'];
     if (!githubToken) {
-      core.setFailed('❌ GITHUB_TOKEN is missing from execution environment.');
+      setFailed('❌ GITHUB_TOKEN is missing from execution environment.');
       return;
     }
 
     const eventPath = process.env['GITHUB_EVENT_PATH'];
-    if (!eventPath || !fs.existsSync(eventPath)) {
-      core.info('✅ Missing or invalid GITHUB_EVENT_PATH context. Skipping audit.');
+    if (!eventPath || !existsSync(eventPath)) {
+      info('✅ Missing or invalid GITHUB_EVENT_PATH context. Skipping audit.');
       return;
     }
 
-    const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+    const eventData = JSON.parse(readFileSync(eventPath, 'utf8'));
     const prNumber = eventData.pull_request?.number;
     const commentsUrl = eventData.pull_request?.comments_url;
 
     if (!prNumber || !commentsUrl) {
-      core.info('✅ Event is not a pull request context pass. Skipping analysis.');
+      info('✅ Event is not a pull request context pass. Skipping analysis.');
       return;
     }
 
     // 1. Resolve @backstage/cli target version
     let backstageCliVersion: string | null = null;
 
-    if (fs.existsSync('package.json')) {
-      const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    const packageJsonPath = resolve(workspaceRoot, 'package.json');
+    if (existsSync(packageJsonPath)) {
+      const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
       const deps = { ...pkg.dependencies, ...pkg.devDependencies };
       backstageCliVersion = deps['@backstage/cli'] || null;
     }
 
     // Fallback to checking the lockfile if package.json uses workspace protocols
-    if (!backstageCliVersion && fs.existsSync('yarn.lock')) {
-      const lockfileContent = fs.readFileSync('yarn.lock', 'utf8');
+    const lockfilePath = resolve(workspaceRoot, 'yarn.lock');
+    if (!backstageCliVersion && existsSync(lockfilePath)) {
+      const lockfileContent = readFileSync(lockfilePath, 'utf8');
       const lockMatch = lockfileContent.match(/"?@backstage\/cli@.*[\s\S]*?version "([^"]+)"/);
       if (lockMatch) {
         backstageCliVersion = lockMatch[1] || null;
@@ -119,17 +137,18 @@ export async function run(): Promise<void> {
     }
 
     if (!backstageCliVersion) {
-      core.info('✅ Could not locate an active @backstage/cli version block in this workspace.');
+      info('✅ Could not locate an active @backstage/cli version block in this workspace.');
       return;
     }
 
     const cleanVersion = backstageCliVersion.replace(/[^\d.]/g, '');
-    core.info(`🔍 Syncing alignment against upstream @backstage/cli version: ${cleanVersion}`);
+    info(`🔍 Syncing alignment against upstream @backstage/cli version: ${cleanVersion}`);
 
     // 2. Safely resolve upstream content templates from Spotify repositories
-    const specificTagUrl = `https://githubusercontent.com{cleanVersion}/packages/cli/config/eslint-factory.js`;
+    // 🟢 FIX: Corrected raw github domain path routing patterns
+    const specificTagUrl = `https://raw.githubusercontent.com/spotify/backstage/v${cleanVersion}/packages/cli/config/eslint-factory.js`;
     const minorVersion = cleanVersion.split('.').slice(0, 2).join('.');
-    const fallbackBranchUrl = `https://githubusercontent.com{minorVersion}/packages/cli/config/eslint-factory.js`;
+    const fallbackBranchUrl = `https://raw.githubusercontent.com/spotify/backstage/v${minorVersion}/packages/cli/config/eslint-factory.js`;
 
     let upstreamSource = await fetchUrl(specificTagUrl);
     if (!upstreamSource || upstreamSource.includes('404: Not Found')) {
@@ -137,15 +156,15 @@ export async function run(): Promise<void> {
     }
 
     if (!upstreamSource || upstreamSource.includes('404: Not Found')) {
-      core.info('⚠️ Failed to locate upstream eslint-factory.js template assets for this pass.');
+      info('⚠️ Failed to locate upstream eslint-factory.js template assets for this pass.');
       return;
     }
 
     // 3. Extract local implementation mappings
-    const localConfigPath = 'packages/config-eslint/src/index.ts';
+    const localConfigPath = resolve(workspaceRoot, 'packages/config-eslint/src/index.ts');
     let localSource = '';
-    if (fs.existsSync(localConfigPath)) {
-      localSource = fs.readFileSync(localConfigPath, 'utf8');
+    if (existsSync(localConfigPath)) {
+      localSource = readFileSync(localConfigPath, 'utf8');
     }
 
     // 4. Prompt your system AI context layer
@@ -163,7 +182,7 @@ ${upstreamSource}
 ${localSource}
 `;
 
-    core.info('🤖 Querying native GitHub Copilot LLM engine for diff analysis...');
+    info('🤖 Querying native GitHub Copilot LLM engine for diff analysis..._');
     const aiAnalysis = await askGithubLLM(githubToken, aiPrompt);
 
     // 5. Construct Markdown Output
@@ -184,12 +203,14 @@ _Please review \`\${localConfigPath}\` if critical rules require structural adju
       body: body,
     });
 
-    core.info('🎉 Alignment status comment posted to the Pull Request successfully.');
+    info('🎉 Alignment status comment posted to the Pull Request successfully.');
   } catch (error) {
     if (error instanceof Error) {
-      core.setFailed(`Audit script failure: ${error.message}`);
+      setFailed(`Audit script failure: ${error.message}`);
     }
   }
 }
 
-run();
+if (typeof require !== 'undefined' && require.main === module) {
+  run();
+}

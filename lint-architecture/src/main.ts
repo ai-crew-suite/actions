@@ -1,6 +1,21 @@
-import * as core from '@actions/core';
-import * as fs from 'fs';
-import * as path from 'path';
+/**
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { setFailed, error, info } from '@actions/core';
+import { existsSync, readFileSync, readdirSync, statSync } from 'fs';
+import { dirname, join, resolve, relative, sep } from 'path';
 
 const SCOPE = "@ai-crew-suite";
 
@@ -9,15 +24,14 @@ interface ValidationResult {
   result: string | null;
 }
 
-// Synchronously searches directories while ignoring runtime artifacts recursively
 function globPackageJsons(dir: string): string[] {
   let results: string[] = [];
-  if (!fs.existsSync(dir)) return results;
+  if (!existsSync(dir)) return results;
 
-  const list = fs.readdirSync(dir);
+  const list = readdirSync(dir);
   for (const file of list) {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+    const filePath = join(dir, file);
+    const stat = statSync(filePath);
 
     if (stat && stat.isDirectory()) {
       if (file === 'node_modules' || file === 'dist' || file === '.turbo' || file === '.yarn') {
@@ -33,7 +47,7 @@ function globPackageJsons(dir: string): string[] {
 
 export function validatePackage(packageJsonPath: string): ValidationResult {
   try {
-    const content = fs.readFileSync(packageJsonPath, 'utf8');
+    const content = readFileSync(packageJsonPath, 'utf8');
     const pkg = JSON.parse(content);
     const pkgName = pkg.name;
 
@@ -42,14 +56,16 @@ export function validatePackage(packageJsonPath: string): ValidationResult {
     }
 
     const workingDir = process.cwd();
-    const absolutePath = path.resolve(packageJsonPath);
+    const absolutePath = resolve(packageJsonPath);
 
+    // 🔴 FIX: Restored native 'absolutePath.startsWith' string method call
     if (!absolutePath.startsWith(workingDir)) {
       return { isValid: false, result: `Package file ${packageJsonPath} is outside working directory.` };
     }
 
-    const relPath = path.relative(workingDir, path.dirname(absolutePath));
-    const segments = relPath.split(path.sep);
+    const relPath = relative(workingDir, dirname(absolutePath));
+    // 🔴 FIX: Restored native 'relPath.split' character separator array split
+    const segments = relPath.split(sep);
 
     if (segments.length < 2 || segments[0] !== 'plugins') {
       return { isValid: true, result: null };
@@ -99,14 +115,14 @@ export function validatePackage(packageJsonPath: string): ValidationResult {
 
 export function run(): void {
   let exitCode = 0;
-  const rootPlugins = path.join(process.cwd(), 'plugins');
+  const rootPlugins = join(process.cwd(), 'plugins');
 
-  if (!fs.existsSync(rootPlugins)) {
-    core.setFailed("❌ Error: Must run this script from the root of your turbo monorepo.");
+  if (!existsSync(rootPlugins)) {
+    setFailed("❌ Error: Must run this script from the root of your turbo monorepo.");
     return;
   }
 
-  core.info(`Checking architecture constraints for scope: ${SCOPE}...\n`);
+  info(`Checking architecture constraints for scope: ${SCOPE}...\n`);
   const packageJsons = globPackageJsons(rootPlugins);
 
   for (const pJson of packageJsons) {
@@ -114,30 +130,30 @@ export function run(): void {
 
     if (!isValid) {
       exitCode = 1;
-      const relLocation = path.relative(process.cwd(), path.dirname(pJson));
-      core.error("❌ Architecture Violation Found!");
-      core.error(`  Location: ${relLocation}`);
+      const relLocation = relative(process.cwd(), dirname(pJson));
+      error("❌ Architecture Violation Found!");
+      error(`  Location: ${relLocation}`);
 
       if (result && result.startsWith(SCOPE)) {
         let foundName = "Unknown";
         try {
-          foundName = JSON.parse(fs.readFileSync(pJson, 'utf8')).name || "Unknown";
+          foundName = JSON.parse(readFileSync(pJson, 'utf8')).name || "Unknown";
         } catch {}
-        core.error(`  Found   : "${foundName}"`);
-        core.error(`  Expected: "${result}"\n`);
+        error(`  Found   : "${foundName}"`);
+        error(`  Expected: "${result}"\n`);
       } else {
-        core.error(`  Error   : ${result}\n`);
+        error(`  Error   : ${result}\n`);
       }
     }
   }
 
   if (exitCode === 0) {
-    core.info("✅ Success: All internal workspace names perfectly match the structural layout rules.");
+    info("✅ Success: All internal workspace names perfectly match the structural layout rules.");
   } else {
-    core.setFailed("❌ Architecture check failed due to naming convention drifts.");
+    setFailed("❌ Architecture check failed due to naming convention drifts.");
   }
 }
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && require.main === module) {
   run();
 }

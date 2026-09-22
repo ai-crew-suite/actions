@@ -10,16 +10,16 @@
     "format": "prettier --write \"src/**/*.{ts,js}\" \"package.json\"",
     "lint": "lint:actions && lint:typescript",
     "lint:actions": "FORCE_COLOR=1 npx node-actionlint",
-    "lint:typescript": "eslint src/**/*.ts",
+    "lint:typescript": "yarn build && eslint src/**/*.ts",
     "test": "yarn test:unit",
-    "test:unit": "vitest run",
-    "test:unit:coverage": "vitest run --coverage",
-    "typecheck": "turbo typecheck",
-    "typecheck:full": "turbo typecheck --force"
+    "test:unit": "yarn build && vitest run",
+    "test:unit:coverage": "yarn build && vitest run --coverage",
+    "typecheck": "yarn build && turbo typecheck",
+    "typecheck:full": "yarn build && turbo typecheck --force"
   },
   "dependencies": {
-    "@actions/core": "catalog:prod:",
-    "@actions/github": "catalog:prod:"
+    "@actions/core": "catalog:prod",
+    "@actions/github": "catalog:prod"
   },
   "devDependencies": {
     "@types/node": "catalog:dev",

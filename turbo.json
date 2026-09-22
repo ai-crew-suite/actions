@@ -8,22 +8,38 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"],
-      "inputs": ["src/**/*", "action.yml", "package.json"]
+      "outputs": ["dist/**", "third-party-licenses.txt"],
+      "inputs": ["src/**/*", "action.yaml", "action.yml", "package.json"],
+      "cache": true
     },
     "clean": {
       "dependsOn": ["^clean"],
       "cache": false
     },
-    "lint": {
-      "outputs": []
-    },
-    "test": {
+    "lint:typescript": {
+      "dependsOn": ["^lint:typescript"],
       "outputs": [],
       "cache": true
     },
+    "lint:actions": {
+      "outputs": [],
+      "inputs": ["action.yaml", "action.yml", ".github/workflows/**/*.yml"],
+      "cache": true
+    },
     "typecheck": {
-      "outputs": []
+      "dependsOn": ["build"],
+      "outputs": [],
+      "cache": true
+    },
+    "test:unit": {
+      "dependsOn": ["build"],
+      "outputs": [],
+      "cache": true
+    },
+    "test:unit:coverage": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "cache": true
     }
   }
 }

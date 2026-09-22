@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "lint:actions && lint:typescript",
+    "lint": "lint:actions",
     "lint:actions": "FORCE_COLOR=1 npx node-actionlint"
   },
   "devDependencies": {
