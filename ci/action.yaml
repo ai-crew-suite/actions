@@ -1,4 +1,3 @@
-# Location: ai-crew-suite/actions -> ci/action.yaml
 name: 'Shared CI Pipeline Engine'
 description: 'Centralized continuous integration pipeline executing installations, builds, lints, and E2E tests'
 

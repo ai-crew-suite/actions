@@ -1,4 +1,3 @@
-# Location: ai-crew-suite/actions -> publish/action.yaml
 name: 'Shared Publish & Release Engine'
 description: 'Centralized package publishing engine featuring Yarn 4 credentials mapping, provenance enforcement, and Slack alerts'
 

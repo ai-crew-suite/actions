@@ -1,4 +1,3 @@
-# Location: ai-crew-suite/actions -> weekly-check-versions/action.yaml
 name: 'Shared Weekly Version Bump Engine'
 description: 'Centralized engine to execute backstage-cli framework upgrades and compile automated tracking pull requests'
 
@@ -20,8 +19,8 @@ runs:
         node-version: \${{ inputs.node-version }}
         cache: 'yarn'
 
-    # We use non-immutable flags here to ensure that backstage-cli can
-    # safely perform structural upgrades across lockfiles if prerequisites shift.
+    # Non-immutable flags here to ensure that backstage-cli can safely
+    # perform structural upgrades across lockfiles if prerequisites shift.
     - name: 📦 Install Workspace Dependencies
       shell: bash
       run: yarn install
