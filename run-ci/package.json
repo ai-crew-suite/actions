@@ -1,0 +1,14 @@
+{
+  "name": "@ai-crew-suite/action-run-ci",
+  "private": true,
+  "description": "Centralized workflow validation mechanics for organization-wide continuous integration passes",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "lint": "lint:actions",
+    "lint:actions": "FORCE_COLOR=1 npx node-actionlint"
+  },
+  "devDependencies": {
+    "node-actionlint": "catalog:dev"
+  }
+}

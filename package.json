@@ -20,6 +20,7 @@
     "playwright-bypass",
     "playwright-run",
     "publish",
+    "sync-static-files",
     "weekly-check-versions",
     "validate-branch"
   ],

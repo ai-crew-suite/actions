@@ -44,7 +44,7 @@ When adding or changing a core backend module, update the matching package READM
 
 ## 🚀 Release & Publication Management
 
-Publish a new version:
+### Publish a New Version
 
 ```bash
 yarn turbo run publish
@@ -52,6 +52,16 @@ yarn turbo run publish
 
 - Proxies `yarn changeset publish` to orchestrate multi-package version increments.
 - Integrates seamlessly with the npm/Yarn lifecycle hooks (`prepack` / `postpack`) declared inside individual frontend and backend plugins, ensuring distribution tarballs carry fully compiled, production-ready path definitions during registry deployment passes.
+
+### Force a Tag Version
+
+```bash
+# 1. Force move local v1 tag to your current commit
+git tag -f v1
+
+# 2. Force push the updated tag to GitHub
+git push origin v1 -f
+```
 
 ## 🔊 Get involved
 

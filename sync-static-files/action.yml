@@ -1,0 +1,23 @@
+name: 'Sync Static Files'
+description: 'Synchronize static files from the infrastructure repository to organization repositories.'
+author: 'AI Crew Suite'
+
+inputs:
+  static_files_path:
+    description: 'Path to the directory containing src/ and sync.ts in the infrastructure repository.'
+    required: true
+  GH_PAT:
+    description: 'GitHub token with permission to clone, push, and open pull requests in target repositories.'
+    required: true
+  PR_LABELS:
+    description: 'Comma- or newline-separated labels to apply to synchronization pull requests.'
+    required: false
+    default: 'sync'
+
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'git-pull-request'
+  color: 'gray-dark'

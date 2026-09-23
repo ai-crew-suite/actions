@@ -66,70 +66,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-crew-suite/action-automate-stale@workspace:automate-stale":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-automate-stale@workspace:automate-stale"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-changeset-controller@workspace:changeset":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-changeset-controller@workspace:changeset"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-ci@workspace:ci":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-ci@workspace:ci"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-codeql@workspace:codeql":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-codeql@workspace:codeql"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-dependency-review-bypass@workspace:dependency-review-bypass":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-dependency-review-bypass@workspace:dependency-review-bypass"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-dependency-review-check@workspace:dependency-review-check":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-dependency-review-check@workspace:dependency-review-check"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-eslint-config-sync@workspace:eslint-config-sync":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-eslint-config-sync@workspace:eslint-config-sync"
-  dependencies:
-    "@actions/core": "catalog:prod"
-    "@actions/github": "catalog:prod"
-    "@types/node": "catalog:dev"
-    "@vercel/ncc": "catalog:dev"
-    eslint: "catalog:dev"
-    node-actionlint: "catalog:dev"
-    prettier: "catalog:dev"
-    typescript: "catalog:dev"
-    vitest: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
 "@ai-crew-suite/action-lint-architecture@workspace:lint-architecture":
   version: 0.0.0-use.local
   resolution: "@ai-crew-suite/action-lint-architecture@workspace:lint-architecture"
@@ -144,43 +80,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-crew-suite/action-playwright-bypass@workspace:playwright-bypass":
+"@ai-crew-suite/action-sync-static-files@workspace:sync-static-files":
   version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-playwright-bypass@workspace:playwright-bypass"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-playwright@workspace:playwright-run":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-playwright@workspace:playwright-run"
+  resolution: "@ai-crew-suite/action-sync-static-files@workspace:sync-static-files"
   dependencies:
     "@actions/core": "catalog:prod"
     "@actions/github": "catalog:prod"
     "@types/node": "catalog:dev"
     "@vercel/ncc": "catalog:dev"
     eslint: "catalog:dev"
+    jiti: "catalog:dev"
     node-actionlint: "catalog:dev"
     prettier: "catalog:dev"
     typescript: "catalog:dev"
     vitest: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-publish@workspace:publish":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-publish@workspace:publish"
-  dependencies:
-    node-actionlint: "catalog:dev"
-  languageName: unknown
-  linkType: soft
-
-"@ai-crew-suite/action-weekly-check-versions@workspace:weekly-check-versions":
-  version: 0.0.0-use.local
-  resolution: "@ai-crew-suite/action-weekly-check-versions@workspace:weekly-check-versions"
-  dependencies:
-    node-actionlint: "catalog:dev"
   languageName: unknown
   linkType: soft
 

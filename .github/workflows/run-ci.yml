@@ -1,0 +1,33 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-test:
+    name: Node v${{ matrix.node-version }} Pipeline
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24]
+
+    env:
+      CI: true
+      NODE_OPTIONS: --max-old-space-size=4096
+
+    steps:
+      - name: ⬇️ Checkout Local Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 🏎️ Execute Centralized CI Core
+        uses: ./run-ci
+        with:
+          node-version: ${{ matrix.node-version }}

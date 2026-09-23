@@ -1,0 +1,14 @@
+{
+  "name": "@ai-crew-suite/action-close-stale-items",
+  "description": "Centralized composite GitHub Action to automatically flag, track, and close stale issues and pull requests across the AI Crew Suite.",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "lint": "lint:actions",
+    "lint:actions": "FORCE_COLOR=1 npx node-actionlint"
+  },
+  "devDependencies": {
+    "node-actionlint": "catalog:dev"
+  }
+}

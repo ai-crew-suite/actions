@@ -1,0 +1,14 @@
+{
+  "name": "@ai-crew-suite/action-analyze-codeql",
+  "description": "Centralized workflow validation mechanics for organization-wide security static analysis passes",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "lint:actions",
+    "lint:actions": "FORCE_COLOR=1 npx node-actionlint"
+  },
+  "devDependencies": {
+    "node-actionlint": "catalog:dev"
+  }
+}

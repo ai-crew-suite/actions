@@ -1,0 +1,24 @@
+name: Flag and Close Stale Issues and Pull Requests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Local Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 🧹 Run Local Stale Action
+        uses: ./close-stale-items
+        with:
+          days-before-issue-stale: 60
+          days-before-pr-stale: 14
