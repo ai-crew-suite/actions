@@ -1,3 +1,18 @@
+/**
+ * Copyright 2026 The AI Crew Suite Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { execFile } from 'node:child_process';
 import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -27,12 +42,12 @@ export interface GitHubClient {
   issues: { addLabels(params: { owner: string; repo: string; issue_number: number; labels: string[] }): Promise<unknown> };
 }
 
-async function runGit(args: string[], cwd?: string): Promise<string> {
+export async function runGit(args: string[], cwd?: string): Promise<string> {
   const result = await exec('git', args, { cwd, maxBuffer: 10 * 1024 * 1024 });
   return result.stdout.trim();
 }
 
-function repositoryUrl(owner: string, name: string, token: string): string {
+export function repositoryUrl(owner: string, name: string, token: string): string {
   return `https://x-access-token:${encodeURIComponent(token)}@github.com/${owner}/${name}.git`;
 }
 
@@ -74,9 +89,9 @@ export async function syncRepository(
   }
 }
 
-async function copyFile(file: FilePlan, repositoryDirectory: string): Promise<void> {
-  if (!existsSync(file.sourcePath)) throw new Error(`Source file not found: ${file.sourcePath}`);
+export async function copyFile(file: FilePlan, repositoryDirectory: string): Promise<void> {
+  if (!existsSync(file.source)) throw new Error(`Source file not found: ${file.source}`);
   const destination = join(repositoryDirectory, file.dest);
   await mkdir(join(destination, '..'), { recursive: true });
-  await cp(file.sourcePath, destination, { recursive: true, force: true });
+  await cp(file.source, destination, { recursive: true, force: true });
 }

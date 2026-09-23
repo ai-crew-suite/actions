@@ -33,7 +33,9 @@ yarn turbo run build --filter=@ai-crew-suite/action-sync-static-files
 
 ### Testing Configuration Updates
 
-To evaluate changes to the underlying file distribution engine or token matrix, target a single mock testing block within your local `sync.ts` architecture using an isolated test application repository before updating production release tags.
+```bash
+yarn turbo run test --filter=@ai-crew-suite/action-sync-static-files
+```
 
 ## Consumer Usage Checklist
 
