@@ -1,5 +1,5 @@
 {
-  "name": "actions",
+  "name": "@ai-crew-suite/pipelines",
   "description": "GitHub Actions package for the AI Crew Suite repos",
   "license": "Apache-2.0",
   "version": "1.0.0",

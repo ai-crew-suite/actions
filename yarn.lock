@@ -97,6 +97,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@ai-crew-suite/pipelines@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@ai-crew-suite/pipelines@workspace:."
+  dependencies:
+    "@changesets/cli": "catalog:dev"
+    "@tsconfig/node24": "catalog:dev"
+    "@types/node": "catalog:dev"
+    "@typescript-eslint/eslint-plugin": "catalog:dev"
+    "@typescript-eslint/parser": "catalog:dev"
+    eslint: "catalog:dev"
+    husky: "catalog:dev"
+    jiti: "catalog:dev"
+    lint-staged: "catalog:dev"
+    prettier: "catalog:dev"
+    turbo: "catalog:dev"
+    typescript: "catalog:dev"
+    vite: "catalog:dev"
+    vitest: "catalog:dev"
+  languageName: unknown
+  linkType: soft
+
 "@babel/code-frame@npm:^7.14.5":
   version: 7.29.7
   resolution: "@babel/code-frame@npm:7.29.7"
@@ -1093,27 +1114,6 @@ __metadata:
   checksum: 10c0/be771be2135cc07910cf76f444ad514d7dcfd6d4a8026e597e93155275abc8ef61eee12211d52146e9d962874269b634f397464942087be013c89d0c54c5f8e5
   languageName: node
   linkType: hard
-
-"actions@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "actions@workspace:."
-  dependencies:
-    "@changesets/cli": "catalog:dev"
-    "@tsconfig/node24": "catalog:dev"
-    "@types/node": "catalog:dev"
-    "@typescript-eslint/eslint-plugin": "catalog:dev"
-    "@typescript-eslint/parser": "catalog:dev"
-    eslint: "catalog:dev"
-    husky: "catalog:dev"
-    jiti: "catalog:dev"
-    lint-staged: "catalog:dev"
-    prettier: "catalog:dev"
-    turbo: "catalog:dev"
-    typescript: "catalog:dev"
-    vite: "catalog:dev"
-    vitest: "catalog:dev"
-  languageName: unknown
-  linkType: soft
 
 "ajv@npm:^6.14.0":
   version: 6.15.0

@@ -31,8 +31,6 @@ runs:
     - name: 📦 Install Workspace Dependencies (Yarn 4 Immutable)
       shell: bash
       run: yarn install --immutable --inline-builds
-      env:
-        YARN_ENABLE_IMMUTABLE_INSTALLS: 'true'
 
     - name: 🚀 Execute Changeset Workflow Lifecycle
       uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2

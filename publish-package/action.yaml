@@ -34,8 +34,6 @@ runs:
     - name: 📦 Install Workspace Dependencies (Yarn 4 Immutable)
       shell: bash
       run: yarn install --immutable --inline-builds
-      env:
-        YARN_ENABLE_IMMUTABLE_INSTALLS: 'true'
 
     - name: 🏎️ Initialize Turborepo Remote GitHub Actions Cache
       uses: rharkor/caching-for-turbo@2238fae6eb9a9936f92356f54cb3660200d105e7 # v2.5.1
